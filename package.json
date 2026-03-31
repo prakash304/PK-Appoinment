@@ -17,5 +17,17 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prakash304/PK-Appoinment.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/prakash304/PK-Appoinment/issues"
+  },
+  "homepage": "https://github.com/prakash304/PK-Appoinment#readme"
 }
