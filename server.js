@@ -63,29 +63,27 @@ try {
 // ─── Start Server (SAFE) ────────────────────────────────────
 async function startServer() {
   try {
-    if (!MONGO_URI) {
-      throw new Error("MONGO_URI is missing in environment variables");
+    console.log("🔍 Checking environment...");
+
+    if (!process.env.MONGO_URI) {
+      throw new Error("MONGO_URI is missing");
     }
 
-    await mongoose.connect(MONGO_URI);
+    console.log("🔌 Connecting to MongoDB...");
+    await mongoose.connect(process.env.MONGO_URI);
+
     console.log("✅ MongoDB connected");
 
-    // ❌ DISABLE seed in production (this was crashing your app)
-    if (process.env.NODE_ENV !== "production") {
-      try {
-        await require('./seedData')();
-        console.log("✅ Seed data loaded");
-      } catch (err) {
-        console.error("❌ Seed error:", err.message);
-      }
-    }
+    // ❌ TEMP: disable seed completely
+    // await require('./seedData')();
 
+    console.log("🚀 Starting server...");
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
 
   } catch (err) {
-    console.error("❌ STARTUP ERROR:", err);
+    console.error("❌ STARTUP ERROR FULL:", err); // 👈 IMPORTANT
     process.exit(1);
   }
 }
