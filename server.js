@@ -1,4 +1,4 @@
-// server.js - Production Ready (Render Safe)
+// server.js - FINAL (Render + Frontend Working)
 require('dotenv').config();
 
 const express = require('express');
@@ -10,8 +10,6 @@ const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
-// ❌ REMOVE localhost fallback (causes crash on Render)
 const MONGO_URI = process.env.MONGO_URI;
 
 // ─── Middleware ─────────────────────────────────────────────
@@ -28,27 +26,30 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: true,          // ✅ REQUIRED for Render (HTTPS)
+    secure: true,
     httpOnly: true,
-    sameSite: "none",      // ✅ IMPORTANT for frontend
+    sameSite: "none",
     maxAge: 24 * 60 * 60 * 1000
   }
 }));
 
-// ─── Static Frontend (SAFE) ─────────────────────────────────
-const frontendPath = path.join(__dirname, '../frontend');
+// ─── Static Frontend (FIXED PATH) ───────────────────────────
+const frontendPath = path.join(__dirname, 'frontend'); // ✅ FIXED
 
 if (fs.existsSync(frontendPath)) {
+  console.log("✅ Frontend folder found");
+
   app.use(express.static(frontendPath));
 
   app.get('*', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
   });
+
 } else {
-  console.log("⚠️ Frontend folder not found");
+  console.log("❌ Frontend folder NOT found at:", frontendPath);
 }
 
-// ─── Routes (SAFE LOAD) ─────────────────────────────────────
+// ─── Routes ─────────────────────────────────────────────────
 try {
   app.use('/api/auth', require('./routes/authRoutes'));
   app.use('/api/categories', require('./routes/categoryRoutes'));
@@ -60,22 +61,19 @@ try {
   console.error("❌ Route loading error:", err);
 }
 
-// ─── Start Server (SAFE) ────────────────────────────────────
+// ─── Start Server ───────────────────────────────────────────
 async function startServer() {
   try {
     console.log("🔍 Checking environment...");
 
-    if (!process.env.MONGO_URI) {
+    if (!MONGO_URI) {
       throw new Error("MONGO_URI is missing");
     }
 
     console.log("🔌 Connecting to MongoDB...");
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(MONGO_URI);
 
     console.log("✅ MongoDB connected");
-
-    // ❌ TEMP: disable seed completely
-    // await require('./seedData')();
 
     console.log("🚀 Starting server...");
     app.listen(PORT, () => {
@@ -83,7 +81,7 @@ async function startServer() {
     });
 
   } catch (err) {
-    console.error("❌ STARTUP ERROR FULL:", err); // 👈 IMPORTANT
+    console.error("❌ STARTUP ERROR FULL:", err);
     process.exit(1);
   }
 }
